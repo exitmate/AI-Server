@@ -33,7 +33,7 @@ class AsyncMongoDBConnection:
         """
         try:
             connection_string = self.config.get_connection_string()
-            logger.info(f"MongoDB 연결 시도: {self.config.host}:{self.config.port}")
+            logger.info(f"MongoDB 연결 시도: {connection_string}")
             
             self.client = motor.motor_asyncio.AsyncIOMotorClient(
                 connection_string,
@@ -92,9 +92,6 @@ class AsyncMongoDBConnection:
         Returns:
             MongoDB 데이터베이스 객체
         """
-        if not self._is_connected:
-            logger.warning("MongoDB에 연결되지 않았습니다.")
-            return None
         return self.database
     
     def get_collection(self, collection_name: str) -> Optional[AsyncIOMotorCollection]:
@@ -108,9 +105,7 @@ class AsyncMongoDBConnection:
             MongoDB 컬렉션 객체
         """
         database = self.get_database()
-        if database:
-            return database[collection_name]
-        return None
+        return database[collection_name]
     
     async def list_collections(self) -> list:
         """
@@ -120,9 +115,7 @@ class AsyncMongoDBConnection:
             컬렉션 목록
         """
         database = self.get_database()
-        if database:
-            return await database.list_collection_names()
-        return []
+        return await database.list_collection_names()
     
     async def create_collection(self, collection_name: str, **kwargs) -> Optional[AsyncIOMotorCollection]:
         """
@@ -136,13 +129,11 @@ class AsyncMongoDBConnection:
             생성된 컬렉션 객체
         """
         database = self.get_database()
-        if database:
-            try:
-                return await database.create_collection(collection_name, **kwargs)
-            except Exception as e:
-                logger.error(f"컬렉션 생성 실패: {e}")
-                return None
-        return None
+        try:
+            return await database.create_collection(collection_name, **kwargs)
+        except Exception as e:
+            logger.error(f"컬렉션 생성 실패: {e}")
+            return None
     
     async def drop_collection(self, collection_name: str) -> bool:
         """
@@ -155,15 +146,13 @@ class AsyncMongoDBConnection:
             삭제 성공 여부
         """
         database = self.get_database()
-        if database:
-            try:
-                await database.drop_collection(collection_name)
-                logger.info(f"컬렉션 삭제 성공: {collection_name}")
-                return True
-            except Exception as e:
-                logger.error(f"컬렉션 삭제 실패: {e}")
-                return False
-        return False
+        try:
+            await database.drop_collection(collection_name)
+            logger.info(f"컬렉션 삭제 성공: {collection_name}")
+            return True
+        except Exception as e:
+            logger.error(f"컬렉션 삭제 실패: {e}")
+            return False
     
     async def get_database_stats(self) -> Optional[Dict[str, Any]]:
         """
@@ -173,13 +162,11 @@ class AsyncMongoDBConnection:
             데이터베이스 통계 정보
         """
         database = self.get_database()
-        if database:
-            try:
-                return await database.command("dbStats")
-            except Exception as e:
-                logger.error(f"데이터베이스 통계 조회 실패: {e}")
-                return None
-        return None
+        try:
+            return await database.command("dbStats")
+        except Exception as e:
+            logger.error(f"데이터베이스 통계 조회 실패: {e}")
+            return None
     
     async def __aenter__(self):
         await self.connect()

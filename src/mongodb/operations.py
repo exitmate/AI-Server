@@ -31,10 +31,6 @@ class AsyncMongoDBOperations:
             삽입된 문서의 ObjectId (문자열)
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return None
-        
         try:
             result = await collection.insert_one(document)
             logger.info(f"문서 삽입 성공: {result.inserted_id}")
@@ -55,10 +51,6 @@ class AsyncMongoDBOperations:
             삽입된 문서들의 ObjectId 리스트
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return None
-        
         try:
             result = await collection.insert_many(documents)
             inserted_ids = [str(id) for id in result.inserted_ids]
@@ -81,10 +73,6 @@ class AsyncMongoDBOperations:
             조회된 문서
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return None
-        
         try:
             document = await collection.find_one(filter_dict, projection)
             if document:
@@ -111,10 +99,6 @@ class AsyncMongoDBOperations:
             조회된 문서 리스트
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return []
-        
         try:
             cursor = collection.find(filter_dict, projection)
             
@@ -145,10 +129,6 @@ class AsyncMongoDBOperations:
             업데이트 성공 여부
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return False
-        
         try:
             result = await collection.update_one(filter_dict, update_dict, upsert=upsert)
             logger.info(f"문서 업데이트 성공: {result.modified_count}개 수정, {result.upserted_id} 생성")
@@ -171,10 +151,6 @@ class AsyncMongoDBOperations:
             업데이트 성공 여부
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return False
-        
         try:
             result = await collection.update_many(filter_dict, update_dict, upsert=upsert)
             logger.info(f"문서 업데이트 성공: {result.modified_count}개 수정, {result.upserted_id} 생성")
@@ -195,10 +171,6 @@ class AsyncMongoDBOperations:
             삭제 성공 여부
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return False
-        
         try:
             result = await collection.delete_one(filter_dict)
             logger.info(f"문서 삭제 성공: {result.deleted_count}개")
@@ -219,10 +191,6 @@ class AsyncMongoDBOperations:
             삭제 성공 여부
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return False
-        
         try:
             result = await collection.delete_many(filter_dict)
             logger.info(f"문서 삭제 성공: {result.deleted_count}개")
@@ -243,10 +211,6 @@ class AsyncMongoDBOperations:
             문서 수
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return 0
-        
         try:
             count = await collection.count_documents(filter_dict or {})
             logger.info(f"문서 수 계산 성공: {count}개")
@@ -269,10 +233,6 @@ class AsyncMongoDBOperations:
             인덱스 생성 성공 여부
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return False
-        
         try:
             if index_name:
                 await collection.create_index(index_fields, name=index_name, unique=unique)
@@ -297,10 +257,6 @@ class AsyncMongoDBOperations:
             인덱스 삭제 성공 여부
         """
         collection = self.connection.get_collection(collection_name)
-        if not collection:
-            logger.error(f"컬렉션을 찾을 수 없습니다: {collection_name}")
-            return False
-        
         try:
             await collection.drop_index(index_name)
             logger.info(f"인덱스 삭제 성공: {index_name}")
