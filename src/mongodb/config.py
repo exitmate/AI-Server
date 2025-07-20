@@ -4,9 +4,7 @@
 
 import os
 from typing import Optional
-from dotenv import load_dotenv
-
-load_dotenv()
+from ..utils import load_env_config
 
 class DatabaseConfig:
     """MongoDB 데이터베이스 설정 클래스"""
@@ -35,6 +33,8 @@ class DatabaseConfig:
             auth_mechanism: 인증 메커니즘 (default: env.MONGODB_AUTH_MECHANISM)
             connection_string: 전체 연결 문자열. 지정된 경우 앞서 선언된 argument는 무시됨
         """
+
+        load_env_config()
         self.connection_string = connection_string or os.getenv('MONGODB_CONNECTION_STRING')
         self.host = host or os.getenv('MONGODB_HOST', 'localhost')
         self.port = port or int(os.getenv('MONGODB_PORT', '27017'))
