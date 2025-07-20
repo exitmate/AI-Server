@@ -19,7 +19,7 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-start = "src.main:main"
+start = "src.main:production"
 dev = "src.main:dev"
 
 
