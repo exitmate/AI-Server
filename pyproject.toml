@@ -1,0 +1,28 @@
+[project]
+name = "crawlingserver"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "ExitMate",email = "exitmate@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "python-dotenv (>=1.1.1,<2.0.0)",
+    "motor (>=3.7.1,<4.0.0)",
+    "pymongo (>=4.13.2,<5.0.0)"
+]
+
+[tool.poetry]
+packages = [
+    {include = "src"}
+]
+
+[tool.poetry.scripts]
+start = "src.main:production"
+dev = "src.main:dev"
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
