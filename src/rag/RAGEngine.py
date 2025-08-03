@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv
+from ..utils import env_loader
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
@@ -9,8 +9,9 @@ from langchain.schema.runnable import RunnablePassthrough
 
 
 class RAGEngine:
-    def __init__(self, env_path="../../.env.development"):
-        load_dotenv(env_path)
+    def __init__(self):
+
+        env = env_loader.load_env_config("development")
 
         # 임베딜, llm, 인덱스명 가져와서 한번만 초기화(싱글톤느낌)
         self.embeddings = OpenAIEmbeddings(openai_api_key=os.environ.get("OPENAI_API_KEY"))
@@ -62,6 +63,9 @@ class RAGEngine:
                     | self.llm
             )
 
+    # 크롤링에서 써야함
+    # todo: 추후 크롤링 문서 가져온 것으로 바꿔넣어야함
+    # todo: 추후 추천로직 정확도 향상을 위해 파인콘 메타데이터 기능을 알아보고 크롤링 로직에 적용시켜야함
     def ingest_documents(self, file_path):
         """
         문서를 벡터 데이터베이스에 저장
@@ -72,14 +76,12 @@ class RAGEngine:
         print("ingesting 시작")
 
         try:
-            # todo: 나중에 크롤링 문서 가져온 것으로 바꿔넣어야함
             loader = TextLoader(file_path)
             documents = loader.load()
 
             print("문서 분할 시작")
             texts = self.text_splitter.split_documents(documents)
 
-            # todo: 추후 추천로직 정확도 향상을 위해 파인콘 메타데이터 기능 알아보고 적용
             print("파인콘 벡터디비에 문서 벡터 임베딩해 저장 시작")
             PineconeVectorStore.from_documents(
                 texts,
@@ -117,12 +119,4 @@ class RAGEngine:
             print(f"retrieval 중 오류 발생: {e}")
             raise
 
-    def get_vectorstore_info(self):
-        """벡터스토어 정보 반환 (디버깅용)"""
-        self._initialize_vectorstore()
-        return {
-            "index_name": self.index_name,
-            "embedding_model": "OpenAI",
-            "vectorstore_initialized": self.vectorstore is not None
-        }
 
