@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .utils import load_env_config
+from .api import routers
 
 
 env = load_env_config("development")
@@ -16,9 +17,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(
+    routers.router
+)
+
 # 테스트용 라우터
 @app.get("/")
 async def root():
     return {"AI": "Server", "env": env}
+
+
 
 
