@@ -110,7 +110,6 @@ class RAGEngine:
             # RAG 체인 초기화 (처음 호출시에만)
             self._initialize_rag_chain()
 
-            # todo: 우리 서비스에 맞는 쿼리로 나중에 바꾸기
             # (제공된 유저 정보를 바탕으로 가장 적합한 공고를 최대 5개 추천하기)
             result = self.rag_chain.invoke(query)
             return result.content
