@@ -31,12 +31,9 @@ class RAGEngine:
     def _setup_prompt_template(self):
         """프롬프트 템플릿 설정"""
         template = """
-        다음 맥락을 활용하여 마지막 질문에 답하세요. 답을 모른다면 그냥 모른다고 말하고, 지어내려고 하지 마세요.
-        항상 한국어로 응답하세요.
+        Question: {question}
 
         {context}
-
-        Question: {question}
 
         Helpful Answer:
         """
