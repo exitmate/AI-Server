@@ -34,7 +34,7 @@ class LeaseType(str, Enum):
     OWNERSHIP = "OWNERSHIP"
 
 
-class BusinessRecommendationRequest(BaseModel):
+class BusinessInfo(BaseModel):
     id: str
     region: str
     industryCategory: IndustryCategory
@@ -50,6 +50,10 @@ class BusinessRecommendationRequest(BaseModel):
     leaseType: LeaseType
     depositAmount: int  # 원 단위
     monthlyRent: int  # 원 단위
+
+
+class BusinessRecommendationRequest(BaseModel):
+    businessInfo: BusinessInfo
 
 
 class BusinessRecommendationResponse(BaseModel):
