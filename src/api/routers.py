@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from ..models.recommendations import SearchResponse, SearchRequest
+from ..models.recommendations import BusinessRecommendationRequest, BusinessRecommendationResponse, SearchResponse, \
+    SearchRequest
 from ..rag.RAGEngine import RAGEngine
+from ..utils.query_builder import _build_business_query
 
 router = APIRouter(prefix="/api", tags=["api"])
 
@@ -24,3 +26,27 @@ async def search(request: SearchRequest, engine: RAGEngine = Depends(get_rag_eng
         question=request.query,
         answer=answer,
     )
+
+
+# 새로운 업장 기반 추천 API
+@router.post("/business/recommendations", response_model=BusinessRecommendationResponse)
+async def get_business_recommendations(
+        request: BusinessRecommendationRequest,
+        engine: RAGEngine = Depends(get_rag_engine)
+):
+    try:
+        # 업장 정보를 기반으로 좀더 세밀하게 조정된 쿼리 문자열 생성
+        recommendation_query = _build_business_query(request)
+
+        recommendations = engine.retrieve_answer(recommendation_query)
+
+        return BusinessRecommendationResponse(
+            business_id=request.id,
+            recommendations=recommendations.split('\n') if recommendations else [],
+            analysis=f"{request.region} {request.industryDetail} 업장 분석 완료"
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"추천 생성 중 오류 발생: {str(e)}")
+
+
