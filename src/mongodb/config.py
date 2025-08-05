@@ -40,7 +40,7 @@ class DatabaseConfig:
         self.port = port or int(os.getenv('MONGODB_PORT', '27017'))
         self.username = username or os.getenv('MONGODB_USERNAME')
         self.password = password or os.getenv('MONGODB_PASSWORD')
-        self.database = database or os.getenv('MONGODB_DATABASE', 'crawling_db')
+        self.database = database or os.getenv('MONGODB_DATABASE', 'base_db')
         self.auth_source = auth_source or os.getenv('MONGODB_AUTH_SOURCE', 'admin')
         self.auth_mechanism = auth_mechanism or os.getenv('MONGODB_AUTH_MECHANISM', 'SCRAM-SHA-1')
     
