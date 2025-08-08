@@ -6,7 +6,7 @@ from typing import Callable
 
 from src.crawl.bizinfo_crawler import crawl_bizinfo
 from src.crawl.sbiz24_crawler import crawl_sbiz24
-
+from src.crawl.bsbsc_crawling import crawl_bsbsc
 from src.mongodb.connection import AsyncMongoDBConnection
 from src.mongodb.operations import AsyncMongoDBOperations
 from src.processing.formatter.gpt_formatter import process_parsed_results
@@ -18,6 +18,7 @@ from src.pipeline.schemas.common_schema import schema
 CRAWLER_MAP = {
     "bizinfo": crawl_bizinfo,
     "sbiz24": crawl_sbiz24,
+    "bsbsc": crawl_bsbsc,
 }
 
 # 파이프라인 실행 함수
@@ -97,6 +98,7 @@ async def run_all_pipelines():
     pipelines = [
         {"site": "bizinfo", "crawler": CRAWLER_MAP["bizinfo"]},
         {"site": "sbiz24", "crawler": CRAWLER_MAP["sbiz24"]},
+        {"site": "bsbsc", "crawler": CRAWLER_MAP["bsbsc"]},
     ]
 
     for p in pipelines:
