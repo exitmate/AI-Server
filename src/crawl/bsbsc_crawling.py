@@ -148,15 +148,16 @@ def crawl_bsbsc():
                         title_element = driver.find_element(By.CSS_SELECTOR, ".view_top h2")
                         title = title_element.text.strip()
                         detail_url = driver.current_url
+                        application_period = driver.find_element(By.CSS_SELECTOR, ".bu_date.tnum").text.strip()
                         
-                        # 첨부파일 처리 - 셀레니움 방식 (공고명 기반 파일명 생성)
                         attachments = extract_attachments(driver, title)
                         
                         # 결과 저장
                         results.append({
                             "제목": title,
                             "상세링크": detail_url,
-                            "첨부파일": attachments 
+                            "첨부파일": attachments,
+                            "신청 가능 기간": application_period
                         })
                         
                         print(f"공고 처리 완료: {title}")
