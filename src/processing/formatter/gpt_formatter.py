@@ -8,7 +8,12 @@ env = env_loader.load_env_config("development")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def format_with_gpt(text: str, schema: dict):
+    from datetime import datetime
+    current_time = datetime.now().strftime("%Y년 %m월 %d일")
+    
     prompt = f"""
+    현재 시점: {current_time} (이 날짜를 기준으로 판단하세요)
+    
     아래는 두 가지 데이터셋입니다:
     1) 크롤링 데이터: 웹사이트에서 직접 수집한 기본 정보
     2) 파싱 데이터: 첨부 문서에서 추출한 상세 정보
@@ -16,6 +21,9 @@ def format_with_gpt(text: str, schema: dict):
     이 두 데이터를 통합 분석하여, 다음 스키마에 맞는 JSON 배열을 생성해줘.
     데이터가 겹칠 경우 보완하거나 합쳐서 하나의 결과로 반환해.
     반드시 코드블록 없이(JSON 배열만) 출력해.
+    isOpen 필드는 현재 시점을 기준으로 판단해.
+    현재 시점이 신청 가능 기간 내에 있으면 True, 아니면 False로 판단해.
+    createdAt, updatedAt 필드는 현재시점과 동일하게 설정해.
 
     스키마:
     {json.dumps(schema, ensure_ascii=False)}
