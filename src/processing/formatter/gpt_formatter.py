@@ -25,6 +25,11 @@ def format_with_gpt(text: str, schema: dict):
     현재 시점이 신청 가능 기간 내에 있으면 True, 아니면 False로 판단해.
     createdAt, updatedAt 필드는 현재시점과 동일하게 설정해.
 
+    중요: 모든 날짜/일시 필드는 ISO 8601 형식으로 출력해.
+    - 날짜만 필요한 경우: YYYY-MM-DD (예: 2025-01-31)
+    - 일시가 필요한 경우: YYYY-MM-DDTHH:MM:SSZ (UTC, 예: 2025-01-31T15:30:00Z)
+    - createdAt, updatedAt은 현재 시각을 UTC 기준 ISO 8601(YYYY-MM-DDTHH:MM:SSZ)로 설정해.
+
     스키마:
     {json.dumps(schema, ensure_ascii=False)}
 

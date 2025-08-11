@@ -12,12 +12,13 @@ from src.mongodb.operations import AsyncMongoDBOperations
 from src.processing.formatter.gpt_formatter import process_parsed_results
 from src.processing.parser.parse_files import parse_files
 from src.pipeline.schemas.common_schema import schema
+from src.utils.date_utils import convert_support_projects_dates
 
 
 # 크롤러 매핑
 CRAWLER_MAP = {
-    "bizinfo": crawl_bizinfo,
-    "sbiz24": crawl_sbiz24,
+    # "bizinfo": crawl_bizinfo,
+    # "sbiz24": crawl_sbiz24,
     "bsbsc": crawl_bsbsc,
 }
 
@@ -52,6 +53,9 @@ async def run_pipeline(site_name: str, crawler_func: Callable):
     conn = AsyncMongoDBConnection()
     await conn.connect()
     db_ops = AsyncMongoDBOperations(conn)
+
+    # 날짜 문자열 → datetime 변환 (DB 적재 전)
+    formatted_results = convert_support_projects_dates(formatted_results)
 
     support_projects = formatted_results["supportProjects"]
     services = formatted_results["services"]
@@ -96,8 +100,8 @@ async def run_pipeline(site_name: str, crawler_func: Callable):
 # 전체 파이프라인 실행
 async def run_all_pipelines():
     pipelines = [
-        {"site": "bizinfo", "crawler": CRAWLER_MAP["bizinfo"]},
-        {"site": "sbiz24", "crawler": CRAWLER_MAP["sbiz24"]},
+        # {"site": "bizinfo", "crawler": CRAWLER_MAP["bizinfo"]},
+        # {"site": "sbiz24", "crawler": CRAWLER_MAP["sbiz24"]},
         {"site": "bsbsc", "crawler": CRAWLER_MAP["bsbsc"]},
     ]
 
