@@ -5,3 +5,7 @@ __pycache__
 .idea
 downloads/
 data/
+
+# manual_task 폴더에서 첨부파일과 수기 텍스트 파일은 트래킹 제외
+manual_task/*
+!manual_task/manual_insert.py
