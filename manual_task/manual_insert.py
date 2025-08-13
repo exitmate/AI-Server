@@ -2,26 +2,15 @@
 수동 공고 등록 유틸리티
 
 사용 예시:
-  # 최소 인자(필수 3개): 제목, 주최, 첨부 디렉토리
-  python manual_task/manual_insert.py \
-    --title "서울시 폐업점포 철거지원" \
-    --host "서울특별시" \
-    --attachments-dir manual_task
+# 최소 인자(필수 4개): 제목, 주최, 첨부 디렉토리, 수기 텍스트 파일
+# 하단 예시를 사용할 때 반드시 title, host 그리고 첨부 디렉토리는 직접 수정하기!
 
-  # 상세 컨텍스트 텍스트 파일을 추가로 제공(권장)
-  # 공고 상세사항에서 들어있는 정보를 직접 notice.txt 파일에 작성해서 제공
-  python manual_task/manual_insert.py \
+python manual_task/manual_insert.py \
     --title "서울시 폐업점포 철거지원" \
     --host "서울특별시" \
     --attachments-dir manual_task \
     --manual-text-file manual_task/notice.txt
 
-환경 변수(옵셔널):
-- MONGODB_COLLECTION_SUPPORT_PROJECTS: 기본값 "support_projects"
-- MONGODB_COLLECTION_SERVICES: 기본값 "services"
-
-주의:
-- 업스테이지/오픈AI 키는 .env.* 로드 규칙에 따라 환경변수로 제공되어야 합니다.
 """
 
 from __future__ import annotations
@@ -29,7 +18,6 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
-import os
 from dataclasses import dataclass
 import re
 from pathlib import Path
@@ -73,7 +61,7 @@ def _parse_attachments_with_upstage(attachments_dir: str, notice_title: str) -> 
     results: List[Dict[str, Any]] = []
     # 스크립트와 같은 디렉토리를 사용할 수 있으므로, 문서형 확장자만 허용해 안전하게 필터링
     allowed_exts = {
-        ".pdf", ".hwp", ".hwpx", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt",
+        ".pdf", ".hwp", ".hwpx", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
         ".jpg", ".jpeg", ".png"
     }
     base = Path(attachments_dir)
@@ -294,7 +282,7 @@ async def _insert_into_mongo(support_projects: List[Dict[str, Any]], services: L
 def _build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="수동 공고 등록 유틸리티")
     p.add_argument("--attachments-dir", type=str, required=True, help="첨부파일 디렉토리 절대경로(필수)")
-    p.add_argument("--manual-text-file", type=str, default=None, help="공고 상세 텍스트 파일 절대경로(권장)")
+    p.add_argument("--manual-text-file", type=str, required=True, help="공고 상세 텍스트 파일 절대경로(필수)")
 
     # 최소 메타데이터
     p.add_argument("--title", type=str, required=True, help="공고 제목")
@@ -327,7 +315,11 @@ async def _run(args: argparse.Namespace) -> None:
 
     # 첨부 파싱 후 결과값 초반 일부만 로그로 출력
     parsed_items = _parse_attachments_with_upstage(args.attachments_dir, notice_title=args.title)
-    print(f"첨부 파싱 결과: {parsed_items[0]['파싱결과'][:100]}...")
+    if parsed_items:
+        preview_text = parsed_items[0].get("파싱결과", "")
+        print(f"첨부 파싱 결과: {preview_text[:100]}...")
+    else:
+        print("첨부 파싱 결과 없음")
 
     combined_payload = _build_combined_payload(manual, parsed_items)
     print("GPT 변환 시작...")
