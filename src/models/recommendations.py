@@ -35,6 +35,28 @@ class LeaseType(str, Enum):
 
 
 class BusinessInfo(BaseModel):
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "id": "123",
+                "region": "부산시",
+                "industryCategory": "FOOD_SERVICE",
+                "industryDetail": "카페",
+                "openedAt": "2020-01-15T00:00:00",
+                "isClosed": False,
+                "closedAt": None,  # 폐업일
+                "isReemployed": False,
+                "isDemolished": False,
+                "monthlySalesRange": "FROM_1000_TO_1500",
+                "areaSizeM2": 33.0,
+                "employeeCount": 2,
+                "leaseType": "MONTHLY",
+                "depositAmount": 20000000,
+                "monthlyRent": 1500000
+            }
+        }
+    }
+    
     id: str
     region: str
     industryCategory: IndustryCategory
@@ -59,3 +81,43 @@ class BusinessRecommendationRequest(BaseModel):
 class BusinessRecommendationResponse(BaseModel):
     business_id: str
     recommended_policy_ids: list[str]
+
+
+class ChatbotRequest(BaseModel):
+    """
+    챗봇 요청 모델
+    - businessInfo: 사업자의 기본 정보 (폐업 절차나 세무 처리에 필요한 맥락 제공)
+    - question: 사용자가 궁금한 폐업 절차나 세무 관련 질문
+    """
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "businessInfo": {
+                    "id": "123",
+                    "region": "부산시",
+                    "industryCategory": "FOOD_SERVICE",
+                    "industryDetail": "카페",
+                    "openedAt": "2020-01-15T00:00:00",
+                    "isClosed": False,
+                    "closedAt": None,
+                    "isReemployed": False,
+                    "isDemolished": False,
+                    "monthlySalesRange": "FROM_1000_TO_1500",
+                    "areaSizeM2": 33.0,
+                    "employeeCount": 2,
+                    "leaseType": "MONTHLY",
+                    "depositAmount": 20000000,
+                    "monthlyRent": 1500000
+                },
+                "question": "폐업을 어떻게 하는지 궁금해"
+            }
+        }
+    }
+    
+    businessInfo: BusinessInfo
+    question: str
+
+
+class ChatbotResponse(BaseModel):
+    question: str
+    answer: str

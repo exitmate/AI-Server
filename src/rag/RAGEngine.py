@@ -9,14 +9,17 @@ from langchain.schema.runnable import RunnablePassthrough
 
 
 class RAGEngine:
-    def __init__(self):
-
+    def __init__(self, index_type="default"):
+        # llm 객체, 임베딩 객체 초기화
         env = env_loader.load_env_config("development")
-
-        # 임베딜, llm, 인덱스명 가져와서 한번만 초기화(싱글톤느낌)
         self.embeddings = OpenAIEmbeddings(openai_api_key=os.environ.get("OPENAI_API_KEY"))
         self.llm = ChatOpenAI()
-        self.index_name = os.environ.get("INDEX_NAME")
+        
+        # 객체 초기화때 인자로 받는 index_type에 따라 다른 벡터DB 인덱스명 사용
+        self.index_name = (
+            os.environ.get("CHATBOT_INDEX_NAME") if index_type == "chatbot" 
+            else os.environ.get("INDEX_NAME")
+        )
 
         # 텍스트 분할기 설정
         self.text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -54,15 +57,12 @@ class RAGEngine:
         if self.rag_chain is None:
             self._initialize_vectorstore()
             self.rag_chain = (
-                    {"context": self.vectorstore.as_retriever() | self._format_docs,
-                     "question": RunnablePassthrough()}
+                    {"context": self.vectorstore.as_retriever() | self._format_docs, "question": RunnablePassthrough()}
                     | self.custom_rag_prompt
                     | self.llm
             )
 
-    # 크롤링에서 써야함
-    # todo: 추후 크롤링 문서 가져온 것으로 바꿔넣어야함
-    # todo: 추후 추천로직 정확도 향상을 위해 파인콘 메타데이터 기능을 알아보고 크롤링 로직에 적용시켜야함
+
     def ingest_documents(self, file_path):
         """
         문서를 벡터 데이터베이스에 저장
@@ -91,6 +91,7 @@ class RAGEngine:
             print(f"ingestion 중 오류 발생: {e}")
             raise
 
+
     def retrieve_answer(self, query):
         """
         질의에 대한 답변 검색 및 생성
@@ -107,12 +108,9 @@ class RAGEngine:
             # RAG 체인 초기화 (처음 호출시에만)
             self._initialize_rag_chain()
 
-            # (제공된 유저 정보를 바탕으로 가장 적합한 공고를 최대 5개 추천하기)
             result = self.rag_chain.invoke(query)
             return result.content
 
         except Exception as e:
             print(f"retrieval 중 오류 발생: {e}")
             raise
-
-
