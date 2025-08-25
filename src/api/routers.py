@@ -2,7 +2,7 @@ import json
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from ..models.recommendations import BusinessRecommendationRequest, BusinessRecommendationResponse, ChatbotResponse, ChatbotRequest
+from ..models.recommendations import BusinessRecommendationRequest, BusinessRecommendationResponse, ChatbotResponse, ChatbotRequest, SearchRequest
 from ..rag.RAGEngine import RAGEngine
 from ..utils.query_builder import _build_business_query, _build_chatbot_query
 
@@ -39,16 +39,8 @@ async def get_business_recommendations(
         engine: RAGEngine = Depends(lambda: get_rag_engine("default"))
 ):
     try:
-        # 업장 정보를 기반으로 좀더 세밀하게 조정된 쿼리 문자열 생성
-        recommendation_query = _build_business_query(request.businessInfo)
-        recommendations = engine.retrieve_answer(recommendation_query)
-
-        try:
-            parsed_response = json.loads(recommendations)
-            policy_ids = parsed_response.get("recommended_policy_ids", [])
-        except json.JSONDecodeError:
-            policy_ids = []
-
+        q = _build_business_query(request.businessInfo)
+        policy_ids = engine.retrieve_policy_ids(q, k=10, topn=5)
         return BusinessRecommendationResponse(
             business_id=request.businessInfo.id,
             recommended_policy_ids=policy_ids
@@ -88,4 +80,3 @@ async def chatbot(
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"챗봇 응답 생성 중 오류 발생: {str(e)}") 
-
