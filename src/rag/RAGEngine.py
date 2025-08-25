@@ -20,6 +20,8 @@ class RAGEngine:
             os.environ.get("CHATBOT_INDEX_NAME") if index_type == "chatbot" 
             else os.environ.get("INDEX_NAME")
         )
+        
+        self.namespace = os.environ.get("PINECONE_NAMESPACE", "")
 
         # 텍스트 분할기 설정
         self.text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -51,6 +53,7 @@ class RAGEngine:
             self.vectorstore = PineconeVectorStore(
                 index_name=self.index_name,
                 embedding=self.embeddings,
+                namespace=self.namespace, 
             )
 
     def _initialize_rag_chain(self):
@@ -76,20 +79,45 @@ class RAGEngine:
             loader = TextLoader(file_path)
             documents = loader.load()
 
-            print("문서 분할 시작")
             texts = self.text_splitter.split_documents(documents)
 
-            print("파인콘 벡터디비에 문서 벡터 임베딩해 저장 시작")
             PineconeVectorStore.from_documents(
                 texts,
                 self.embeddings,
-                index_name=self.index_name
+                index_name=self.index_name,
+                namespace=self.namespace,
             )
             print("ingestion 완료")
 
         except Exception as e:
             print(f"ingestion 중 오류 발생: {e}")
             raise
+    
+    def retrieve_policy_ids(self, query: str, k: int = 10, topn: int = 5) -> list[str]:
+        """
+        질의(query)에 대해 벡터스토어에서 유사 문서를 검색한 뒤,
+        검색 결과 문서들의 metadata에서 정책 ID(policy_id)만 추출하여 반환한다.
+
+        Args:
+            query (str): 검색할 사용자 질의.
+            k (int, optional): 벡터스토어에서 가져올 유사 문서 개수. 기본값은 10.
+            topn (int, optional): 최종적으로 반환할 고유한 정책 ID의 최대 개수. 기본값은 5.
+
+        Returns:
+            list[str]: 중복되지 않는 정책 ID 문자열 리스트.
+                      (metadata에 policy_id가 없으면 id 필드를 대신 사용)
+        """
+        self._initialize_vectorstore()
+        docs = self.vectorstore.similarity_search(query, k=k, namespace=self.namespace)
+        ids: list[str] = []
+        for d in docs:
+            meta = getattr(d, "metadata", {}) or {}
+            pid = meta.get("policy_id") or meta.get("id")
+            if pid and pid not in ids:
+                ids.append(pid)
+            if len(ids) >= topn:
+                break
+        return ids
 
 
     def retrieve_answer(self, query):
