@@ -16,7 +16,7 @@ def _build_business_query(b: BusinessInfo) -> str:
         f"건물 철거 여부 {'예' if b.isDemolished else '아니오'}"
     )
 
-def _build_chatbot_query(business: BusinessInfo) -> str:
+def _build_chatbot_query(business: BusinessInfo, question: str) -> str:
     query = f"""
 당신은 exitmate의 폐업관련 전문 안내 AI 챗봇입니다. 매우 친절하고 열정적이며, 폐업 절차 및 세무 행정에 관련된 질의에 특화돼 있습니다. 
 고객이 필요한 도움을 받을 수 있도록 진심으로 돕고 싶어 합니다.
@@ -66,6 +66,10 @@ exitmate는 폐업 소상공인을 위한 AI 지원 서비스입니다. 폐업 �
 - 전문가 상담 필요 시: "추후 전문가 연결 서비스 도입 예정"임을 안내
 
 챗봇 특성상 긴 답변은 좋지 않으므로 짧게 답변하고 이어지는 추가적인 질의를 제공할 것. 추가적인 질의는 유저 질의에 따라 필요할 때에만 활용한다.
+
+---
+
+유저가 궁금해하는 것: {question}
 """
 
     return query.strip()

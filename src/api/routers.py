@@ -56,25 +56,15 @@ async def get_business_recommendations(
 async def chatbot(
     request: ChatbotRequest, 
     engine: RAGEngine = Depends(lambda: get_rag_engine("chatbot"))):
-    """
-    폐업한 소상공인을 위한 세무/행정 처리 챗봇
-    
-    Args:
-        request: 사업자 정보를 포함한 요청
-        engine: chatbot 인덱스를 사용하는 RAG 엔진
-    
-    Returns:
-        ChatbotResponse: 챗봇의 답변
-    """
     try:
         # 사업자 정보를 바탕으로 챗봇용 쿼리 생성
-        query = _build_chatbot_query(request.businessInfo)
+        query = _build_chatbot_query(request.businessInfo, request.question)
         
         # RAG를 통해 답변 생성 (챗봇 인덱스에서 세무/행정 지식 검색)
         answer = engine.retrieve_answer(query)
         
-        return ChatbotResponse(
-            question=query,  
+        return ChatbotResponse( 
+            question=request.question,
             answer=answer
         )
     
